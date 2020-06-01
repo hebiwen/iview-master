@@ -1,0 +1,56 @@
+
+
+@media screen and (min-width:320px){ .main{ width: 320px; } .footer{width: 320px;} } /* 当屏幕尺寸大于768时 */
+/* @media screen and (min-width:768px) and (max-width:990px) { .main{ width: 750px;} } 当屏幕尺寸大于768,小于990时 */
+@media screen and (min-width:375px){ .main{ width: 375px;} .footer{ width: 375px;} }
+@media screen and (min-width:414px){ .main{ width: 414px; } .footer{width: 414px;} }
+/* @media only screen and (max-width:768px){ .main{ width: 720px; } .footer{width: 720px;} } */
+
+/*global css start*/
+html,body { width: 100%;height: 100%; padding: 0;margin: 0; font-size: 14px; }
+ul,li { list-style: none;padding: 0; }
+a,a:hover,a:visited,a:focus { text-decoration: none;color: #737373; }
+.main{ margin: auto; border: 1px solid #eee;}
+.mgt-5px { margin-top: 5px; }
+.mgr-5px { margin-right: 5px; }
+.mgl-5px { margin-left: 5px; }
+.mgb-5px { margin-bottom: 5px; }
+.mgt-10px { margin-top: 10px; }
+.mgr-10px { margin-right: 10px; }
+.mgl-10px { margin-left: 10px; }
+.mgb-10px { margin-bottom: 10px;}
+.fl { float: left; }
+.fr { float: right; }
+/*global css end*/
+
+/*head css start*/
+.head-menu { width: auto; overflow-x: auto; white-space: nowrap; height: 35px;line-height: 35px;}
+.head-menu li{ width: 25%;text-align: center;display: inline-block; }
+/*head css end*/
+
+/*content css start */
+.img-responsive { display: block; height: auto; max-width: 100%; }
+/*content css end*/
+
+/*foot css start*/
+.footer{ left: auto; bottom: 0;position: fixed;height: 50px;box-shadow: 0 -2px 10px #ccc; background-color: #eee;  }
+.foot-menu { display: flex;justify-content: space-around; height: 50px;line-height: 50px; }
+.foot-menu li { float: left;width: 20%;text-align: center;}
+.foot-menu li a { display: block; }
+.foot-menu li a i { width: 100%;height: 30px;float: left; line-height: 35px;text-align: center; }
+.foot-menu li a span { width: 100%;height: 20px;float: left; line-height: 20px;text-align: center;font-size: 10px; }
+/*foot css end*/
+
+/* shopIndex css start */
+.g-nav-list { border: 1px solid #eee; height: 85px; }
+.g-nav-list li { width: 21%; float: left; text-align: center;border: 1px solid #eee; margin: 3px 2%;height: 35px;line-height: 35px; }
+.g-tab-item-list { height: 40px; border: 1px solid #eee; padding:4px; overflow-x: auto;white-space: nowrap;width: auto; }
+.g-tab-item-list li { width: 100px; text-align: center;height: 35px;line-height: 35px; display: inline-block;}
+.g-list{ width: 100%;}
+.g-detail { width: 46%;float: left;margin: 2% ;}
+.g-detail img { height: 180px; width: 100%;}
+.g-detail dt { height: 35px; line-height: 35px; }
+/* shopIndex css end*/
+
+
+
