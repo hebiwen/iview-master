@@ -1,0 +1,85 @@
+1、微信小程序 ，在公司打开微信开发者工具网络断开连接（渲染层网络层错误）是因为公司网络使用代理的原因
+2、iview-adimin-test 继续完善，并且前后分离进行线上部署，windows + linux两种环境
+4、包括邮件模块，商城模块，报告模块，会员管理，短信通知，邮件通知，文件管理模块（图片 文档 ），热点分词
+5、内容管理（1、宣传册 2、广告，3、活动宣传）
+7、前端页面做成百度文库的商城模式
+8、后台登陆权限管理[ 1、超级管理员 2、管理员（客户）3、加工员]
+
+
+
+7、mongodb备份与还原
+mongodump -h dbhost -d dbname -o dbdirectory  --备份语法
+mongodump -h localhost -d webapp -o F:\BackUp\webapp
+
+mongorestore -h dbhost -d dbname --dir dbdirectory  --还原语法
+mongorestore -h localhost -d webapp --dir  F:\BackUp\webapp
+
+9、win7 IP:192.168.95.178               CentOS IP:192.168.95.175                MacOS IP:192.168.95.17x                Win10 IP :192.168.95.176
+
+端口分布 { iis :8081-8089 ,nginx: 8091-8099  }   尽量不使用默认端口8080
+iis TLSVP2_CSPC : 8089
+node : iview-admin-test:8099
+
+10、node 调试 cmd命令行工具中输入 node --inspect-brk main.js ，在谷歌浏览器“开发者工具中”找到 node-inspector 进入调试
+node --inspect main.js 进行调试
+
+11、"code":"EMESSAGE","response":"554 DT:SPM“
+
+       "code":"EENVELOPE","response":"550 RP:TRC”
+
+       "code":"EENVELOPE","response":"451 RP:QRC“ 15708244625 --aa123123
+
+12、windows在cmd模式中进入到nginx目录下
+ 开启：start nginx     关闭：nginx.exe -s stop/quit   重启：nginx.exe -s reload    
+
+13、Linux 中开启nginx服务
+开启: systemctl start nginx 关闭：nginx -s stop   重启: nginx -s reload
+关闭防火墙：systemctl stop firewalld
+
+13、git使用步骤
+（1）在github 上创建Responsitory 目录名称即为项目名称
+（2）在本地生成ssh key： 在本地项目目录下右键git bash here 然后输入 ssh-keygen -t rsa -C "214207036@qq.com"
+（3）在C:\Users\Heb\.ssh文件夹下找到id_rsa.pub公匙，打开公匙复制里面的key
+（4）回到github上，进入 Account Settings（账户配置），左边选择SSH Keys，Add SSH Key,title随便填，粘贴公匙上生成的key。
+（5）验证是否成功： 在git bash 中输入 ssh -T git@github.com ，如果是第一次的会提示是否continue，输入yes就会看到：You've successfully authenticated, but GitHub does not provide shell access 。这就表示已成功连上github。
+（6）初始化本地项目根目录下的git配置文件：在git bash中输入 git init  再输入git remote add origin https://github.com/hebiwen/iview-master.git,
+       会出现一个.git的文件夹，进入文件夹打开config文件添加
+       [remote "origin"]
+       url = https://github.com/hebiwen/test.git
+（7）上传项目文件到github：输入命令 git add * 这步操作还是在暂存中
+（8）再输入命令 git commit -m "代码备注"  现在代码已经提交到head中，但还没到远程仓库
+（9）再输入命令 git push origin master / git push -u origin master 项目已经提交到github上，此处master 可以改成你想要推送的任何分支
+
+
+学习计划
+1、Mongodb 要学会查询、连表查询、插入、修改、删除等SQL及Mongoose的使用
+2、前端Vue 起码要学会怎么用
+3、iview-master要开发完成
+4、邮件服务独立开发一个
+
+https://www.lx598.com/jrzn.html  //乐信短信平台
+
+
+提醒
+1、后台登录能否回车登录 （未实现）
+2、下午去梦想市集退卡 （以退卡）
+3、router/index 能否分离 （以完成分离）
+4、京东购物车实现原理
+1)用户没有登录, 添加商品, 此时的商品是被添加到了浏览器的Cookie中, 所以当再次访问时(不登录),商品仍然在Cookie中, 所以购物车中的商品还是存在的.
+
+2)用户登录了,添加商品, 此时会将Cookie中和用户选择的商品都添加到购物车中, 然后删除Cookie中的商品. 所以当用户再次访问(不登录),此时Cookie中的购物车商品已经被删除了, 所以此时购物车中的商品不在了.
+
+3)用户登录, 添加商品,此时商品被添加到数据库做了持久化存储, 再次打开登录用户名和密码, 该用户选择的商品肯定还是存在的, 所以购物车中的商品还是存在的.
+
+4)理由3)
+
+
+
+1.完成邮件服务的开发
+
+
+
+
+
+
+
