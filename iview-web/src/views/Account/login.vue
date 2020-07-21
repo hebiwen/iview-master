@@ -115,7 +115,7 @@ export default {
                     let query = new URLSearchParams();
                     query.append("userName",this.formTop.userName);
                     query.append("password",this.formTop.password);
-                    this.$http.post('/api/login',query).then((result) => {
+                    this.$http.post(this.baseURL + '/login',query).then((result) => {
                         if(!result){
                             this.$Message.error("用户名或密码错误");
                             return false;

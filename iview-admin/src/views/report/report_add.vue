@@ -48,13 +48,13 @@
 
           <!-- 
             <img :src="formValidate.thumb" style="width:160px;height:180px" class="fl" >
-              <Upload action="/api/uploadSingle" name="file" :on-success="handleSuccess" class="fl margin-left-10" >
+              <Upload action="/api/admin/uploadSingle" name="file" :on-success="handleSuccess" class="fl margin-left-10" >
               <Button icon="ios-cloud-upload-outline">上传图片</Button>
             </Upload>
           -->
         </FormItem>
         <FormItem label="文件">
-            <Upload action="/api/uploadArray" name="files"  :on-success="handleSuccess" multiple >
+            <Upload action="/api/admin/uploadArray" name="files"  :on-success="handleSuccess" multiple >
               <Button icon="ios-cloud-upload-outline">上传文件</Button>
             </Upload> 
         </FormItem>
@@ -125,7 +125,7 @@ export default {
         query.append('fileName',this.formValidate.fileName);
         query.append('content',this.simpleMDE.value());
 
-        this.$http.post('/api/addReport',query).then(result => {
+        this.$http.post('/api/admin/addReport',query).then(result => {
             if(!result){
                 this.$Message.error({ content:result.message,duration:10 });
                 return;
@@ -139,7 +139,7 @@ export default {
     // iview-upload上传
     handleSuccess (res, file) {
         if(res && !util.isNullOrEmpty(res.fileName)){
-          this.formValidate.fileName.push("/api/" + res.fileName);
+          this.formValidate.fileName.push("/api" + res.fileName);
         }
     },
     // 1、选择图片 2、裁剪 3、压缩 4、上传
@@ -168,12 +168,12 @@ export default {
         let dataFile = util.dataURLtoFile(canvas.toDataURL(),this.cpOption.imgName);
         var formData = new FormData();
         formData.append('file',dataFile);
-        this.$http.post('/api/uploadSingle',formData).then(result => {
+        this.$http.post('/api/admin/uploadSingle',formData).then(result => {
             if(!result){
                 this.$Message.error({ content:'图片上传失败',duration:3 });
                 return false;
             }
-            this.formValidate.thumb = '/api/' + result.data.fileName;
+            this.formValidate.thumb = '/api' + result.data.fileName;
         })
     }
   },

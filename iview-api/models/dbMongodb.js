@@ -1,31 +1,28 @@
 var mongoose = require('mongoose')
 var util = require('../common/helper');
-mongoose.connect('mongodb://localhost:27017/webapp', { useNewUrlParser: true });
 
-mongoose.connection.on('connected', function () {
-    console.log('connect to mongodb success');
-})
-
-mongoose.connection.on('error', function () {
-    console.log('connect to mongodb error');
-})
+mongoose.connect('mongodb://localhost:27017/webapp', { useNewUrlParser: true },err => {
+    if(err) console.log('connect to mongodb error');
+    else console.log('connect to mongodb success');
+});
 
 // 将每张表的_id保存在Counter表中
-var Counter = new mongoose.Schema({
+var CounterSch = new mongoose.Schema({
     _id:{ type:String,required:true },
     seq:{ type:Number,default:0 }
-},{ collection :'Counter' })
+},{ collection :'Counter' },{ versionKey:false })
 
-var Category = new mongoose.Schema({
-    id: Number,
+var CategorySch = new mongoose.Schema({
+    _id: Number,
     CategoryName: String,
     Childrens: Array,
+    Sort:Number,
     CreateDate: String,
     LastModified: String,
     IsValid: Boolean
 }, { collection: 'Categorys' });
 
-var Report = new mongoose.Schema({
+var ReportSch = new mongoose.Schema({
     _id: Number,
     Title: String,
     Thumb: String,
@@ -40,7 +37,7 @@ var Report = new mongoose.Schema({
     IsValid: { type:Boolean, default:true }
 }, { collection: 'Reports' },{ versionKey : false })
 
-var AccountInfo = new mongoose.Schema({
+var AccountInfoSch = new mongoose.Schema({
     _id:Number,
     UserId:String ,
     WeixinOpenId:String ,
@@ -62,7 +59,7 @@ var AccountInfo = new mongoose.Schema({
     BalanceInOrder:Number ,
     AuditStatus:Number ,
     AuditDate:Date ,
-    UserType:Number ,
+    UserType:String ,
     QRCode:String ,
     Remark:String,
     CreateDate:Date ,
@@ -70,7 +67,7 @@ var AccountInfo = new mongoose.Schema({
     IsValid:Boolean
 },{collection:'DZZD_AccountInfo'},{ versionKey:false })  // versionKey 解决生成表数据时产生的_v字段
 
-var AccountDept = new mongoose.Schema({
+var AccountDeptSch = new mongoose.Schema({
     _id:Number, 
     title:String ,
     ParentId:String ,
@@ -81,13 +78,41 @@ var AccountDept = new mongoose.Schema({
     children:Array
 },{collection:'DZZD_AccountDept'})
 
+var ShopCartSch = new mongoose.Schema({
+    _id:Number,
+    UserId:String,
+    CookieId:String,
+    GoodsId:String,
+    GoodsName:String,
+    Amount:{ type:Number,default:1 },
+    Price:{ type:Number,default:0.00 },
+    FeeSum:{ type:Number,default:0.00 },
+    CreateDate:{ type:Date,default:util.currDate}
+})
+
+var GoodsInfoSch = new mongoose.Schema({
+    _id:Number,
+    GoodsName:String, 
+    GoodsPrice:Number,      
+    GoodsRealPrice:Number,  // 实价(折扣价)
+    Spec:String,            // 规格
+    WorkCategory:String,    // 所属类别
+    Thumb:String,
+    ShopName:String,        // 商品名称(厂家名称、生产商、销售商)
+    GoodsDescription:String,
+    GoodsDetail:String,
+    Remark:String,
+    CreateDate:Date
+},{ collection:'DZZD_GoodsInfo' },{ versionKey:false })
 
 Model = {
-    dbCounter : mongoose.model('Counter',Counter),
-    dbCategory : mongoose.model('Categorys', Category),
-    dbReport : mongoose.model('Reports', Report),
-    dbAccountInfo : mongoose.model('AccountInfo',AccountInfo),
-    dbAccountDept : mongoose.model('AccountDept',AccountDept),
+    dbCounter : mongoose.model('Counter',CounterSch),
+    dbCategory : mongoose.model('Categorys', CategorySch),
+    dbReport : mongoose.model('Reports', ReportSch),
+    dbAccountInfo : mongoose.model('AccountInfo',AccountInfoSch),
+    dbAccountDept : mongoose.model('AccountDept',AccountDeptSch),
+    dbShopCart : mongoose.model('ShopCart',ShopCartSch),
+    dbGoodsInfo:mongoose.model('GoodsInfo',GoodsInfoSch)
 }
 
 module.exports = Model

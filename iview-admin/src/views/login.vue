@@ -30,7 +30,7 @@
                             <Button @click="handleSubmit" type="primary" long>登录</Button>
                         </FormItem>
                     </Form>
-                    <p class="login-tip">输入任意用户名和密码即可</p>
+                    <p class="login-tip">输入手机号或者登录账号</p>
                 </div>
             </Card>
         </div>
@@ -43,7 +43,7 @@ export default {
     data () {
         return {
             form: {
-                userName: 'iview_admin',
+                userName: Cookies.get('user'),
                 password: ''
             },
             rules: {
@@ -57,20 +57,27 @@ export default {
         };
     },
     methods: {
-        handleSubmit () {
+       async handleSubmit () {
             this.$refs.loginForm.validate((valid) => {
                 if (valid) {
-                    Cookies.set('user', this.form.userName);
-                    Cookies.set('password', this.form.password);
-                    this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
-                    if (this.form.userName === 'iview_admin') {
-                        Cookies.set('access', 0);
-                    } else {
-                        Cookies.set('access', 1);
-                    }
-                    this.$router.push({
-                        name: 'home'
-                    });
+                    var query = new URLSearchParams();
+                    query.append("userName",this.form.userName);
+                    query.append("password",this.form.password);
+                    this.$http.post('/api/admin/login', query).then(result => {
+                        if(result.data.data.length <= 0){
+                            this.$Message.error("账号或密码错误");
+                            return;
+                        }
+                        if(result.data.data[0].UserType == null || result.data.data[0].UserType.indexOf('管理员') < 0 ){
+                            this.$Message.warning("您没有登录权限"); // 通过UserType来判断是否有登录权限
+                            return;
+                        }
+                        Cookies.set('user', result.data.data[0].UserName);
+                        Cookies.set('password', this.form.password);
+                        this.$store.commit('setAvator',result.data.data[0].Avtar);
+                        Cookies.set('access',0);
+                        this.$router.push({name: 'home'});
+                    })
                 }
             });
         }

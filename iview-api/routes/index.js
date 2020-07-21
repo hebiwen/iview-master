@@ -19,11 +19,24 @@ var createFolder = function(folder){
   }
 }
 
+// var createFolder = function(folder){
+//   try{
+//     if(fs.existsSync(folder)){
+//       fs.accessSync(folder);
+//     }else{
+//       fs.mkdirSync(folder);
+//     }
+//   }catch(e){
+//     console.log("createFolder err:"+ e)
+//   }
+// }
+
+
 /*
  *  文件上传
  **/
-var uploadFolder = './uploadFolder/' + util.formatDate(new Date(),'yyyyMM') + '/';
-// createFolder(uploadFolder);
+var uploadFolder = './uploadFolder/' + util.formatDate(new Date(),'yyyyMMdd') + '/';
+createFolder(uploadFolder);
 
 var storage = multer.diskStorage({
   destination:function(req,file,cb){
@@ -53,8 +66,6 @@ router.get('/', function(req, res, next) {
  * 文件上传
  **/
 router.post('/uploadSingle', upload.single('file'),function(req,res,next){
-  console.log("upload1:"+req.file);
-
   let fileName = req.file.path;
   result.fileName = fileName;
 
@@ -75,7 +86,7 @@ router.post('/uploadArray',upload.array('files',5),function(req,res,next){
 /**
  * base64压缩上传 (1、文件名会重新生成 2、只适合上传图片 3、图片会变大)
  **/
-router.post('/uploadBase64',upload.single('file'),function(req,res,next){
+router.post('/uploadBase64',function(req,res,next){
   // console.log("req.file:"+req.body.file);
   let file = req.body.file;
   let base64Data = file.replace(/^data:image\/\w+;base64,/, '');
@@ -83,7 +94,7 @@ router.post('/uploadBase64',upload.single('file'),function(req,res,next){
   var path = uploadFolder.replace('./','') + util.formatDate(new Date(),"yyyyMMdd") +".jpg";
   fs.writeFile(path,buffer,function(err){
     if(err) throw err;
-    result.fileName = path;
+    result.fileName = path; 
     res.send(result);
   })
 })

@@ -3,7 +3,10 @@
   <swiper :options="swiperOption" class="swiper" >
       <!-- <swiper-slide><img src="../../assets/wap1.jpg" class="swipper-img" ></swiper-slide>
       <swiper-slide><img src="../../assets/wap2.png" class="swipper-img" ></swiper-slide> -->
-      <swiper-slide :key="index" v-for="(image,index) in list" ><img :src="image.imgUrl" class="swipper-img" ></swiper-slide>
+      <swiper-slide :key="index" v-for="(image,index) in list" >
+        <img :src="image.imgUrl" class="swipper-img" >
+        <!-- <img v-lazy="image.imgUrl" class="swipper-img" > -->
+      </swiper-slide>
       <div class="swiper-pagination" slot="pagination"></div>
   </swiper>
 </div>
@@ -36,6 +39,7 @@
   }
   .swipper-img{
     width:100%;
+    height:120px;
     display: block;
   }
 </style>

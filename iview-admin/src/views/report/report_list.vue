@@ -65,7 +65,7 @@
             </Card>
         </FormItem>
         <FormItem label="文件">
-            <Upload ref="upload" action="/api/uploadArray" name="files" :show-upload-list="true" :default-file-list="fileTags" :on-success="handleSuccess" multiple >
+            <Upload ref="upload" action="/api/admin/uploadArray" name="files" :show-upload-list="true" :default-file-list="fileTags" :on-success="handleSuccess" multiple >
               <Button icon="ios-cloud-upload-outline">上传文件</Button>
             </Upload> 
         </FormItem>
@@ -188,7 +188,7 @@ export default {
             name:this.search,
             pageIndex:pageIndex
             };
-        this.$http.get('/api/reportList',{params:_params}).then(result=>{
+        this.$http.get('/api/admin/reportList',{params:_params}).then(result=>{
             console.log(result);
             this.reports = result.data.data;
             this.total = result.data.total;
@@ -203,7 +203,7 @@ export default {
     removeReport(id){
         let query  = new URLSearchParams();
         query.append('id',id);
-        this.$http.post('/api/removeReport',query).then(result=>{
+        this.$http.post('/api/admin/removeReport',query).then(result=>{
             if(!result){
                 this.$Message.error({content:'删除失败,请重新操作',duration:3});
                 return false;
@@ -215,7 +215,7 @@ export default {
     showModal(id){
         this.divModal = true;
         this.editId = id; // 当前编辑的报告Id
-        this.$http.get('/api/reportDetail',{ params:{ id :id } }).then(result => {
+        this.$http.get('/api/admin/reportDetail',{ params:{ id :id } }).then(result => {
             this.formValidate = {
                 title: result.data.Title,
                 thumb:result.data.Thumb,
@@ -244,10 +244,10 @@ export default {
         query.append('title',this.formValidate.title);
         query.append('thumb',this.formValidate.thumb);
         query.append('content',this.simpleMDE.value());
-        query.append('fileName',this.formValidate.fileName.toString());
-        query.append('category',this.formValidate.category.toString());
+        query.append('fileName',util.isNullOrEmpty(this.formValidate.fileName)?'' : this.formValidate.fileName.toString());
+        query.append('category',util.isNullOrEmpty(this.formValidate.category)?'' : this.formValidate.category.toString());
 
-        this.$http.post('/api/editReport',query).then(result => {
+        this.$http.post('/api/admin/editReport',query).then(result => {
             if(!result) return false;
             this.$Message.success({ content:'保存成功',duration:3 });
             this.divModal = false;
@@ -265,12 +265,24 @@ export default {
     },
     handleCrop(){
         let canvas = this.cropper.getCroppedCanvas();
-        let dataFile = util.dataURLtoFile(canvas.toDataURL(),this.cpOption.imgName);
+        // let dataFile = util.dataURLtoFile(canvas.toDataURL(),this.cpOption.imgName);
+        // var formData = new FormData();
+        // formData.append('file',dataFile);
+        // this.$http.post('/api/admin/uploadSingle',formData).then(result => {
+        //     if(!result){
+        //         this.$Message.error({ content:'图片上传失败',duration:3 });
+        //         return false;
+        //     }
+        //     this.formValidate.thumb = '/api' + result.data.fileName;
+        // })
+       
+       //通过base64上传图片
         var formData = new FormData();
-        formData.append('file',dataFile);
-        this.$http.post('/api/uploadSingle',formData).then(result => {
+        formData.append('file',canvas.toDataURL('image/jpg'));
+        formData.append('fileName',this.cpOption.imgName);
+        this.$http.post('/api/admin/uploadBase64',formData).then(result =>{
             if(!result){
-                this.$Message.error({ content:'图片上传失败',duration:3 });
+                this.$Message.error({ content:'图片上传失败',duration:3});
                 return false;
             }
             this.formValidate.thumb = '/api/' + result.data.fileName;

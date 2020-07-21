@@ -1,10 +1,5 @@
-<template>
+<template description="书城">
   <div class="page-shop">
-    <Row>
-      <Col span="22" offset="1" class="mgb-5px">
-        <Input search placeholder="缓存历史搜索记录" />
-      </Col>
-    </Row>
     <Row>
       <Col span="24">
         <ul class="g-nav-list">
@@ -31,34 +26,21 @@
         <li class="tab-item">中小学教材</li>
       </ul>
       <div class="g-list">
-        <dl class="g-detail">
-          <img src="../../assets/wap2.png">
+        <dl class="g-detail" v-for="goods in goodsList">
+          <router-link tag="a" :to="{path:'/shop/goods',query:{ id:goods._id }}">
+            <dd><img src="../../assets/wap2.png" /></dd>
+            
+            <dt>{{ goods.GoodsName }}</dt>
+          </router-link>
+        </dl>
+        <!-- <dl class="g-detail">
+          <dd><img src="../../assets/wap2.png"></dd>
           <dt>慢慢来,一切都来得及</dt>
         </dl>
         <dl class="g-detail">
-          <img src="../../assets/wap2.png">
+          <dd><img src="../../assets/wap2.png"></dd>
           <dt>慢慢来,一切都来得及</dt>
-        </dl>
-        <dl class="g-detail">
-          <img src="../../assets/wap2.png" >
-          <dt>慢慢来,一切都来得及</dt>
-        </dl>
-        <dl class="g-detail">
-          <img src="../../assets/wap2.png">
-          <dt>慢慢来,一切都来得及</dt>
-        </dl>
-        <dl class="g-detail">
-          <img src="../../assets/wap2.png">
-          <dt>慢慢来,一切都来得及</dt>
-        </dl>
-        <dl class="g-detail">
-          <img src="../../assets/wap2.png">
-          <dt>慢慢来,一切都来得及</dt>
-        </dl>
-        <dl class="g-detail">
-          <img src="../../assets/wap2.png">
-          <dt>慢慢来,一切都来得及</dt>
-        </dl>
+        </dl> -->
       </div>
     </Row>
   </div>
@@ -66,7 +48,22 @@
 
 <script>
 export default {
-
+  name:'ShopIndex',
+  data(){
+    return{
+      goodsList:[]
+    }
+  },
+  mounted(){
+    this.loadGoodsList()
+  },
+  methods:{
+      loadGoodsList(){
+        this.$http.get(this.baseURL + '/goodsList').then(result=>{
+          this.goodsList = result.data.data;
+        })
+      }
+  }
 }
 
 </script>

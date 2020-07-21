@@ -48,14 +48,10 @@ export default {
         //     this.$router.push({ path:name });
         // }
     },
-    watch:{
-        $route(to,from){
-            console.log("footer:" + to.name);
-        }
-    }
+    
 }
 
 </script>
 <style>
-.router-link-active a{ color: red; }
+.router-link-active a{ color: red !important; }
 </style>

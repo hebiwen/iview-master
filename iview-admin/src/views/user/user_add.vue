@@ -95,7 +95,7 @@ export default {
       query.append('position',this.formValidate.position);
       query.append('auditDate',this.formValidate.auditDate);
 
-      this.$http.post('/api/addUser',query).then(result=>{
+      this.$http.post('/api/admin/addUser',query).then(result=>{
         if(!result){
           this.$Message.error({ content:'保存失败',duration:3});
           return;

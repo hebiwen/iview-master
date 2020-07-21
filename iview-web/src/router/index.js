@@ -36,10 +36,23 @@ export const mainRouter = {
       ]
 }
 
+
+export const appRouter = {
+  path:'/index',
+  name:'childRoute',
+  title:'二级路由',
+  component:() => import('@/views/main.vue'),
+  children:[
+    { path:'/index/report',title:'报告详情',name:'report',component:() => import('@/views/Report/report') },
+    { path:'/shop/goods',title:'商品详情',name:'goods',component:() => import('@/views/Shop/goods') },
+  ]
+}
+
 export default new Router({
-  // mode:'history',
+  mode:'history',
   routes: [
     ...loginAndRegisterRouter, // 路由数组
-    mainRouter
+    mainRouter,
+    appRouter,
   ]
 })

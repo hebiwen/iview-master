@@ -16,6 +16,7 @@
           <keep-alive>
               <router-view></router-view>
           </keep-alive>
+          
       </div>
       
       <!-- 底部 -->
@@ -36,7 +37,9 @@ export default {
         
     },
     watch:{
-        //监听路由变化
+        $route(to,from){
+            
+        }
     }
 }
 

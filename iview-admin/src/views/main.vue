@@ -8,7 +8,6 @@
             <scroll-bar ref="scrollBar">
                 <shrinkable-menu 
                     :shrink="shrink"
-                    :theme="menuTheme"
                     :open-names="openedSubmenuArr"
                     :menu-list="menuList"
                     :before-push="beforePush"
@@ -37,8 +36,7 @@
                 </div>
                 <div class="header-avator-con">
                     <message-tip v-model="mesCount"></message-tip>
-                    <theme-switch></theme-switch>
-                    
+
                     <div class="user-dropdown-menu-con">
                         <Row type="flex" justify="end" align="middle" class="user-dropdown-innercon">
                             <Dropdown transfer trigger="click" @on-click="handleClickUserDropdown">
@@ -48,7 +46,7 @@
                                 </a>
                                 <DropdownMenu slot="list">
                                     <DropdownItem name="ownSpace">个人中心</DropdownItem>
-                                    <DropdownItem name="loginout" divided>退出登录</DropdownItem>
+                                    <DropdownItem name="logout" divided>退出登录</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
                             <Avatar :src="avatorPath" style="background: #619fe7;margin-left: 10px;"></Avatar>
@@ -75,10 +73,8 @@
 <script>
     import scrollBar from '@/views/my-components/scroll-bar/vue-scroller-bars';
     import shrinkableMenu from './main-components/shrinkable-menu/shrinkable-menu.vue';
-
     import breadcrumbNav from './main-components/breadcrumb-nav.vue';
     import messageTip from './main-components/message-tip.vue';
-    import themeSwitch from './main-components/theme-switch/theme-switch.vue';
     import tagsPageOpened from './main-components/tags-page-opened.vue';
 
     import Cookies from 'js-cookie';
@@ -88,7 +84,7 @@
         data(){
             return {
                 shrink:false,
-                userName:'Heb',
+                userName:'admin',
                 openedSubmenuArr:this.$store.state.app.openedSubmenuArr
             }
         },
@@ -97,16 +93,12 @@
             scrollBar,
             breadcrumbNav,
             messageTip,
-            themeSwitch,
             tagsPageOpened
         },
         computed:{
             // computed定义的方法我们是以属性访问的形式调用的，{{menuList}}。具有缓存功能
             menuList(){
                 return this.$store.state.app.menuList;
-            },
-            menuTheme () {
-                return this.$store.state.app.menuTheme;
             },
             pageTagsList(){
                 return this.$store.state.app.pageOpenedList;
@@ -115,7 +107,7 @@
                 return this.$store.state.app.currentPath;
             },
             avatorPath(){
-                return localStorage.avtorImgPath;
+                return localStorage.avatorImgPath;
             },
             cachePage(){
                 return this.$store.state.app.cachePage;
@@ -138,7 +130,15 @@
                 this.$store.commit('setMessageCount',3);
             },
             toggleClick(){},
-            handleClickUserDropdown(name){},
+            handleClickUserDropdown(name){
+                if(name == "ownSpace"){
+                    util.openNewPage(this,'');
+                    this.$router.push({ name : 'ownSpane' })
+                }else if(name == "logout") {
+                    this.$store.commit('logout',this);
+                    this.$router.push({ name : 'login' })
+                }
+            },
             checkTag(name){
                 let openpageHasTag = this.pageTagsList.some(item=>{
                     if(item.name == name){

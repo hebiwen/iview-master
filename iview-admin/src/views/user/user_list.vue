@@ -221,7 +221,7 @@ export default {
   methods: {
     /* 获取部门树 */
     getDeptTree(){
-        this.$http.get('/api/dept').then(result=>{
+        this.$http.get('/api/admin/dept').then(result=>{
             if(result.data == null) return;
             this.deptTree = result.data.data;
         }).catch(err=>{
@@ -244,7 +244,7 @@ export default {
                 search:this.search,
                 deptCode:this.deptCode
             };
-            this.$http.get('/api/userList',{params:_params}).then(result=>{
+            this.$http.get('/api/admin/userList',{params:_params}).then(result=>{
                 this.userList = result.data.data;
                 this.exportList = result.data.data;
                 this.total = result.data.total;
@@ -262,7 +262,7 @@ export default {
     /* 显示员工模态框 */
     showModal(id){
         this.divModal = true;
-        this.$http.get('/api/userDetail',{params:{id:id}}).then(result=>{
+        this.$http.get('/api/admin/userDetail',{params:{id:id}}).then(result=>{
             let dptJson = this.ArrayParseJson(result.data.DeptCode.split(','),result.data.DeptName.split(','));
             
             this.formValidate = {
@@ -302,7 +302,7 @@ export default {
             email:this.formValidate.email
         }
 
-        this.$http.post('/api/editUser',qs.stringify(query)).then(result=>{
+        this.$http.post('/api/admin/editUser',qs.stringify(query)).then(result=>{
             if(!result) {
                 this.$Message.error({content:'保存失败,请重新提交',duration:3});
                 return;
@@ -317,7 +317,7 @@ export default {
     removeUser(id){
         let query = new URLSearchParams();
         query.append('id',id);
-        this.$http.post('/api/removeUser',query).then(result=>{
+        this.$http.post('/api/admin/removeUser',query).then(result=>{
             if(!result){
                 this.$Message.error({content:'删除失败,请重新提交',duration:3});
                 return;

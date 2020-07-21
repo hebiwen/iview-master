@@ -1,55 +1,38 @@
-<!--首页-->
-<template>
-      <div class="page-content">
-        <Row>
-        <Col span="24" style="text-align:center" >
-            <img src="@/assets/logo.png" alt="文库">
-        </Col>
-        <Col span="24">
-            <ul class="head-menu">
-                <!--子集路由跳转时带上back-->
-                <router-link tag="li" to="/index">推荐</router-link>
-                <router-link tag="li" to="/category">热门</router-link>
-                <router-link tag="li" to="/my">互联网</router-link>
-                <router-link tag="li" to="/my">教学办公</router-link>
-                <router-link tag="li" to="/my">文学科教</router-link>
-            </ul>
-        </Col>
-        </Row>
-        <Row>
+<template description="首页">
+      <div class="page-index">
+        <div class="page-index-head">
             <!--横幅轮播功能-->
             <Swiper></Swiper>
-        </Row>
-	
-        <!-- 拉到底部刷新分页 -->
-        <Row>
-          <Card>
-            <Scroll :on-reach-bottom="handleReachBottom" height="500" >
-            <List item-layout="vertical">
-              <ListItem v-for="item in reports" :key="item._id">
-                <ListItemMeta :avatar = "item.Thumb" :title="item._id + '.' +item.Title"></ListItemMeta>
-                {{ item.Content }}
-                <template slot="action">
-                <li>
-                    <Icon type="ios-star-outline" /> 123
+        </div>
+        
+        <div class="page-index-list fl" style="width:100%;">
+            <ul class="index-menu">
+                <!--子集路由跳转时带上back-->
+                <li><router-link tag="a" :to="{path:'/index',query:{category:'全部'}}" :class="{'current': currCategory == '全部' }">全部</router-link></li>
+                <li v-for="item in categorys" :key="item._id" >
+                    <router-link tag="a" :to="{path:'/index',query:{category:item.CategoryName}}" :class="{'current':item.CategoryName == currCategory}" >{{item.CategoryName}}</router-link>
+                    <!-- <a href="javascript:;" :class="item.CategoryName == currCategory ? 'current' : ''">{{item.CategoryName}}</a> -->
                 </li>
-                <li>
-                    <Icon type="ios-thumbs-up-outline" /> 234
+            </ul>
+            
+            <!-- 拉到底部刷新分页 -->
+            <Scroll :on-reach-bottom="handleReachBottom" height="380" >
+            <ul class="index-list">
+                <li v-for="item,index in reports" :key="item._id">
+                    <router-link  tag="a" :to="{path:'/index/report',query:{id:item._id}}" >
+                        <div class="index-list-title">{{(index+1) + '.' +item.Title}}</div>
+                        <div class="index-list-content">{{ item.Content.substring(0,50) }}</div>
+                    </router-link>
                 </li>
-                <li>
-                    <Icon type="ios-chatbubbles-outline" /> 345
-                </li>
-                </template>
-              </ListItem>
-            </List>
+            </ul>
             </Scroll>
-         </Card>
-        </Row>
+        </div>
     </div>
 </template>
 
 <script>
 import Swiper from './banner';
+import util from '../../libs/util';
 
 export default {
     name:'Index',
@@ -57,21 +40,34 @@ export default {
         return{
             reports:[],
             pageIndex:1,
-            total:0
+            total:0,
+            categorys:[],
+            currCategory:'全部'
         }
     },
     components:{
         Swiper
     },
     mounted(){ 
+        this.getCategory();
         this.getReports();
      },
     methods:{
+        getCategory(){
+            this.$http.get(this.baseURL + '/categoryList',{params:{group:['hyzx','hybg']}}).then(result => {
+                if(result.data.data.length <=0) return;
+                this.categorys = result.data.data;
+                // this.currCategory = result.data.data[0].CategoryName;
+            })
+        },
         getReports(pageIndex){
-            var _params = { name:'',pageIndex:pageIndex};
+            var _params = { 
+                pageIndex:pageIndex, 
+                category:this.currCategory == '全部' ? '' : this.currCategory
+                };
             // nginx 发布时使用全路径 http://134.175.93.211:3090/reportList
-            this.$http.get('http://134.175.93.211:3090/reportList',{ params : _params }).then(result => {
-                console.log(result);
+            // 配置baseURL之前路径是 /api/web/reportList
+            this.$http.get(this.baseURL + '/reportList',{ params : _params }).then(result => {
                 this.reports = result.data.data;
             })
         },
@@ -80,7 +76,7 @@ export default {
                 this.pageIndex =  this.pageIndex*1 + 1;
                 setTimeout(()=>{
                     var _params = { name:'',pageIndex:this.pageIndex};
-                    this.$http.get('http://134.175.93.211:3090/reportList',{params:_params}).then(result=>{
+                    this.$http.get(this.baseURL + '/reportList',{params:_params}).then(result=>{
                         if(result.data.data.length>0)
                         {
                             result.data.data.forEach((item)=>{
@@ -92,13 +88,29 @@ export default {
                 },500);
             })
         }
+    },
+    watch:{
+        $route(){
+            //不知道为啥用query ,而params娶不到值
+            console.log("query:"+ this.$route.query);
+            let currentCate = this.$route.query.category
+            if(!util.isNullOrEmpty(currentCate)){
+                this.currCategory = currentCate;
+                this.getReports();
+            }
+        }
     }
 }
 </script>
 <style>
-    .ivu-card-body{padding:0 10px; }
-    .ivu-list-item-meta{ margin-bottom: 0 !important; }
-    .ivu-list-item{ padding: 5px 0; }
-    .ivu-list-item-action{ margin-top: 0 !important; }
-    .ivu-list-item-meta-title { margin-bottom: 5px !important; }
+   .ivu-scroll-loader-wrapper { padding: 0 }
+  .current { color: #1cb584 !important;font-weight: 700; }
+  .current::after {
+      content: '';
+    width: 100%;
+    height: 2px;
+    border-radius: 1px;
+    background-color: #1cb584;
+    display: block;
+  }
 </style>
