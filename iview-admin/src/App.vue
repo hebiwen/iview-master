@@ -35,4 +35,5 @@ html,body{
     width: 100%;
     height: 100%;
 }
+.ivu-table-cell{ padding-left: 10px; padding-right: 10px; }
 </style>

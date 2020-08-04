@@ -63,7 +63,7 @@ export const appRouter = [
         title:'商城管理',
         component:main,
         children:[
-            { path: '/', title: '商品分类', name: 'goodsCate', icon:'ios-pricetag', component: () => import('@/views/report/report_list.vue') },
+            { path: 'category', title: '商品分类', name: 'goodsCate', icon:'ios-pricetag', component: () => import('@/views/shop/category.vue') },
             { path: 'goods_list', title: '商品列表', name: 'goods',icon:'bag', component: () => import('@/views/shop/goods_list.vue') },
             { path: '/', title: '订单列表', name: 'orders',icon:'ios-cart', component: () => import('@/views/report/report_list.vue') }
         ]

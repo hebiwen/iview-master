@@ -7,7 +7,7 @@ let util = {
 
 };
 util.title = function (title, vm) {
-    let iTitle = 'admin';
+    let iTitle = '行业报告';
     if (title) {
         iTitle += ' - ' + (title.i18n ? vm.$t(title.i18n) : title);
     }

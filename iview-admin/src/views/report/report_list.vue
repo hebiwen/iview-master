@@ -27,7 +27,7 @@
             </Col>
     </Row>
 
-    <Modal v-model="divModal" title="文章详情" width="900" @on-ok="saveReport()" ok-text="保存" style="top:20px" >
+    <Modal v-model="divModal" title="文章详情" width="900" @on-ok="saveReport()" ok-text="保存" >
       <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80" >
         <FormItem label="标题：" prop="title">
             <Input v-model="formValidate.title" class="input" width="400" placeholder="请输入标题"></Input>

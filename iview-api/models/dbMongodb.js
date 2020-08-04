@@ -105,6 +105,17 @@ var GoodsInfoSch = new mongoose.Schema({
     CreateDate:Date
 },{ collection:'DZZD_GoodsInfo' },{ versionKey:false })
 
+
+var DZZDCategorySch = new mongoose.Schema({
+    _id:Number,
+    CategoryName:String,
+    Sort:Number,
+    Group:String,  // 所属分类
+    ParentId:Number,
+    SelfCode:String  // 自身Code(2.3.5)
+},{ collection:'DZZD_Category'},{ versionKey:false })
+
+
 Model = {
     dbCounter : mongoose.model('Counter',CounterSch),
     dbCategory : mongoose.model('Categorys', CategorySch),
@@ -112,7 +123,8 @@ Model = {
     dbAccountInfo : mongoose.model('AccountInfo',AccountInfoSch),
     dbAccountDept : mongoose.model('AccountDept',AccountDeptSch),
     dbShopCart : mongoose.model('ShopCart',ShopCartSch),
-    dbGoodsInfo:mongoose.model('GoodsInfo',GoodsInfoSch)
+    dbGoodsInfo:mongoose.model('GoodsInfo',GoodsInfoSch),
+    dbCategoryDZZD : mongoose.model('DZZD_Category',DZZDCategorySch)
 }
 
 module.exports = Model

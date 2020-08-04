@@ -3,6 +3,7 @@ var router = express.Router();
 var db = require('../models/dbMongodb');
 var util = require('../common/helper');
 var logger = require('../common/log');
+var apiEnum = require('../common/enum');
 var fs = require('fs');
 var multer = require('multer');
 
@@ -12,16 +13,20 @@ const pageSize = 10;
 
 var createFolder = function(folder){
   try{
-    fs.accessSync(folder);
+    if(fs.existsSync(folder)){
+      fs.accessSync(folder);
+    }else{
+      fs.mkdirSync(folder); // 同步创建文件夹
+    }
   }catch(e){
-     fs.mkdirSync(folder); // 同步创建文件夹
+     console.log('createFolder err:'+e)
   }
 }
 
 /*
  *  文件上传
  **/
-var uploadFolder = './uploadFolder/' + util.formatDate(new Date(),'yyyyMMdd') + '/';
+var uploadFolder = '../uploadFolder/' + util.formatDate(new Date(),'yyyyMMdd') + '/';
 createFolder(uploadFolder);
 
 var storage = multer.diskStorage({
@@ -91,7 +96,6 @@ router.post('/uploadBase64',upload.single('file'),function(req,res,next){
 })
 
 
-
 /* 获取用户分页数据 */
 router.get('/userList',function(req,res,next){
   logger.info('get userList data'+ util.currDate)
@@ -117,20 +121,14 @@ router.get('/userList',function(req,res,next){
   db.dbAccountInfo.countDocuments(query).then(function(count){
     var skip = (pageIndex-1)*pageSize;
     db.dbAccountInfo.find(query).sort({_id: util.sort.asc}).limit(pageSize).skip(skip).then(function(docs){
-      console.log(docs);
-        result.pageIndex= pageIndex;
-        result.data = docs;
-        result.total = count;
-        result.message = 'get accountInfo list success.';
-
-        res.json(result);
+      result = { pageIndex: pageIndex, total:count,data:docs };
+      res.json(result);
     })
 
     // 连接查询
     // db.dbAccountInfo.find({}).populate({ path:'Department',select:{ name:1 } }).exec(function(err,obj){
     //   console.log("data is :",obj);
     // })
-
   })
 })
 
@@ -163,7 +161,7 @@ router.post('/addUser',function(req,res,next){
       result.message = "用户名已存在";
       return;
     }
-    db.dbCounter.findOneAndUpdate({ _id:'AccountInfoIdSeqGenerator' },{ $inc:{ seq:1 } },{ new:true,upsert:true },(error,counter) => {
+    db.dbCounter.findOneAndUpdate({ _id:apiEnum.COUNTER.AccountId },{ $inc:{ seq:1 } },{ new:true,upsert:true },(error,counter) => {
       if(error) throw error;
       console.log('AccountSeq:'+counter.seq);
       account._id = counter.seq;
@@ -195,6 +193,7 @@ router.post('/editUser',function(req,res,next){
 router.post('/removeUser',function(req,res,next){
     db.dbAccountInfo.remove({_id:req.body.id},function(err,docs){
       if(err) return;
+    
       res.send(docs);
     })
 })
@@ -214,7 +213,6 @@ router.get('/reportList', function(req, res, next) {
       res.json(result);
     })
   })
-
 });
 
 /* 添加报告 */
@@ -235,7 +233,7 @@ router.post('/addReport',function(req,res,next){
       return false;
     }
 
-    db.dbCounter.findOneAndUpdate({_id:'ReportIdSeqGenerator'},{ $inc:{ seq : 1 } },{ new:true,upsert:true },(error,counter) => {
+    db.dbCounter.findOneAndUpdate({ _id:apiEnum.COUNTER.ReportId },{ $inc:{ seq : 1 } },{ new:true,upsert:true },(error,counter) => {
       if(error) throw error;
       console.log('seq:'+counter.seq);
       report._id = counter.seq;
@@ -249,8 +247,12 @@ router.post('/addReport',function(req,res,next){
 
 /* 删除报告 */
 router.post('/removeReport',function(req,res,next){
+  
   db.dbReport.remove({_id:req.body.id},function(err,docs){
     if(err) return;
+    db.dbCounter.findOneAndUpdate({ _id:apiEnum.COUNTER.ReportId },{ $inc:{seq:-1} },{new:true,upsert:true },function(error,counter){
+      if(error) throw error;
+    })
     res.send(docs);
   })
 })
@@ -286,7 +288,6 @@ router.post('/editReport',function(req,res,next){
 
 })
 
-
 /* 获取部门树 */
 router.get('/dept',function(req,res,next){
   db.dbAccountDept.find().then(function(docs){
@@ -304,6 +305,103 @@ router.post('/login',function(req,res,next){
     if(err) throw err; 
     result.data = docs;
     res.send(result);
+  })
+})
+
+/* 分类导航 */
+router.get('/categoryList',function(req,res,next){
+  var query = {};
+  var group = req.query.group;
+  if(!util.isNullOrEmpty(group)){
+    if(group.length == 1){
+      query = { Group : group[0] }
+    }else if(group.length > 1){
+      query = { Group: { $in : group } }
+    }
+  }
+  db.dbCategory.find(query).sort({ Sort:util.sort.asc }).then(docs => {
+    res.send(docs);
+  })
+})
+
+router.post('/addCategory',function(req,res,next){
+  let category = {
+    CategoryName : req.body.categoryName,
+    ParentId:req.body.parentId,
+  }
+  db.dbCounter.findOneAndUpdate({ _id :apiEnum.COUNTER.CategoryId },{ $inc:{ seq:1 } },{ new:true,upsert:true },function(error,counter){
+    console.log('seq:'+counter.seq);
+    category._id = counter.seq;
+    category.SelfCode = req.body.selfCode +'.' + counter.seq;
+    db.dbCategoryDZZD.create(category,function(error,docs){
+      if(error) throw error;
+      res.send(docs);
+    })
+  })
+})
+
+/** 修改分类 */
+router.post('/editCategory',function(req,res,next){
+  var id = req.body.id;
+  var newText = req.body.newText;
+
+  db.dbCategoryDZZD.updateOne({ _id:id },{ CategoryName:newText },function(error,docs){
+    if(error) throw error;
+    res.send(docs);
+  })
+})
+
+/** 删除分类 */
+router.post('/removeCategory',function(req,res,next){
+  db.dbCategoryDZZD.remove({_id:req.body.id},function(error,docs){
+    if(error) throw error;
+    res.send(docs);
+  })
+})
+
+/** 分类导航 */
+router.get('/categoryListNew',function(req,res,next){
+  db.dbCategoryDZZD.find().sort({ Sort:util.sort.asc }).then(docs => {
+    res.send(docs)
+  })
+})
+
+/* 商品列表 */
+router.get('/goodsList',function(req,res,next){
+  var pageIndex = Number(req.query.pageIndex || 1)
+  var query = {};
+  if(!util.isNullOrEmpty(req.query.goodsName)){
+    query = { GoodsName : {$regex : new RegExp(req.query.goodName,i)} }
+  }
+  db.dbGoodsInfo.countDocuments(query).then((count)=>{
+    let skip = (pageIndex -1 )* pageSize;
+    db.dbGoodsInfo.find(query).skip(skip).limit(pageSize).sort({_id:util.sort.asc}).then(docs => {
+      result = { pageIndex:pageIndex,total:count,data:docs };
+      res.send(result);
+    })
+  })
+})
+
+/* 商品详情 */
+router.get('/goodsDetail',function(req,res,next){
+  var query = {};
+  var id = req.query.id;
+  if(!util.isNullOrEmpty(id)){
+    query = { _id :id };
+  }
+  db.dbGoodsInfo.findOne(query).then(docs => {
+    res.send(docs);
+    console.log('resultId'+docs._id)
+  })
+})
+
+/**
+ * 删除商品
+ */
+router.post('/removeGoods',function(req,res,next){
+  db.dbGoodsInfo.remove({_id : req.body.id },(err,docs)=>{
+    if(err) throw err;
+    res.send(docs);
   })
 })
 

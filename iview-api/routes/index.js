@@ -11,31 +11,31 @@ var multer = require('multer');
 const str1 = '1';
 const pageSize = 10;
 
-var createFolder = function(folder){
-  try{
-    fs.accessSync(folder);
-  }catch(e){
-     fs.mkdirSync(folder); // 同步创建文件夹
-  }
-}
-
 // var createFolder = function(folder){
 //   try{
-//     if(fs.existsSync(folder)){
-//       fs.accessSync(folder);
-//     }else{
-//       fs.mkdirSync(folder);
-//     }
+//     fs.accessSync(folder);
 //   }catch(e){
-//     console.log("createFolder err:"+ e)
+//      fs.mkdirSync(folder); // 同步创建文件夹
 //   }
 // }
+
+var createFolder = function(folder){
+  try{
+    if(fs.existsSync(folder)){
+      fs.accessSync(folder);
+    }else{
+      fs.mkdirSync(folder);
+    }
+  }catch(e){
+    console.log("createFolder err:"+ e)
+  }
+}
 
 
 /*
  *  文件上传
  **/
-var uploadFolder = './uploadFolder/' + util.formatDate(new Date(),'yyyyMMdd') + '/';
+var uploadFolder = '../uploadFolder/' + util.formatDate(new Date(),'yyyyMMdd') + '/';
 createFolder(uploadFolder);
 
 var storage = multer.diskStorage({
