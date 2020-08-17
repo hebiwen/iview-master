@@ -6,7 +6,6 @@ var logger = require('../common/log');
 var fs = require('fs');
 var multer = require('multer');
 
-
 /* 定义常量 */
 const str1 = '1';
 const pageSize = 10;
@@ -61,6 +60,7 @@ router.use(function(req,res,next){
 router.get('/', function(req, res, next) {
    res.render('index', { title: 'Express' });
 });
+
 
 /**
  * 文件上传

@@ -223,7 +223,7 @@ export default {
     getDeptTree(){
         this.$http.get('/api/admin/dept').then(result=>{
             if(result.data == null) return;
-            this.deptTree = result.data.data;
+            this.deptTree = result.data;
         }).catch(err=>{
             console.log("get dept data error:",err);
         })

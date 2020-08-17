@@ -5,8 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var bodyParser = require('body-parser');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+// var indexRouter = require('./routes/index');
+// var usersRouter = require('./routes/users');
 var webRouter = require('./routes/web');
 var adminRouter = require('./routes/admin');
 
@@ -40,8 +40,8 @@ app.all('*',function(req,res,next){
   }
 })
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// app.use('/', indexRouter);
+// app.use('/users', usersRouter);
 app.use('/admin',adminRouter);
 app.use('/web',webRouter);
 

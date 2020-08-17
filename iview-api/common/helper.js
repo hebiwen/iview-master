@@ -3,6 +3,8 @@ var util = {};
 
 util.defaultPwd = '123456';
 
+util.pageSize = 10;
+
 util.sort = { asc : 1 , desc: -1 };
 
 util.formatDate = function(date,format){
@@ -45,5 +47,12 @@ util.isNullOrEmpty = function(obj){
 
 util.currDate = util.formatDate(new Date(),"yyyy-MM-dd hh:mm");
 
+
+// NBA final, laker, 总冠军
+// var obj={
+//     name: "laker",
+//     msg: "总冠军"
+//   }
+//   var message1=`NBA final, ${obj.name}, ${obj.msg}` 
 
 module.exports = util;

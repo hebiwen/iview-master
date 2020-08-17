@@ -64,17 +64,17 @@ export default {
                     query.append("userName",this.form.userName);
                     query.append("password",this.form.password);
                     this.$http.post('/api/admin/login', query).then(result => {
-                        if(result.data.data.length <= 0){
+                        if(result.data.length <= 0){
                             this.$Message.error("账号或密码错误");
                             return;
                         }
-                        if(result.data.data[0].UserType == null || result.data.data[0].UserType.indexOf('管理员') < 0 ){
+                        if(result.data[0].UserType == null || result.data[0].UserType.indexOf('管理员') < 0 ){
                             this.$Message.warning("您没有登录权限"); // 通过UserType来判断是否有登录权限
                             return;
                         }
-                        Cookies.set('user', result.data.data[0].UserName);
+                        Cookies.set('user', result.data[0].UserName);
                         Cookies.set('password', this.form.password);
-                        this.$store.commit('setAvator',result.data.data[0].Avtar);
+                        this.$store.commit('setAvator',result.data[0].Avtar);
                         Cookies.set('access',0);
                         this.$router.push({name: 'home'});
                     })

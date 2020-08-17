@@ -30,7 +30,7 @@ export const appRouter = [
         component: main,
         children: [
             { path: '/', title: '管理员列表', name: 'admins', icon: 'ios-person', component: () => import('@/views/user/user_list.vue') },
-            { path: '/', title: '角色管理', name: 'roles', icon: 'arrow-swap', component: () => import('@/views/user/dept.vue') },
+            { path: 'role_list', title: '角色管理', name: 'roles', icon: 'arrow-swap', component: () => import('@/views/security/role.vue') },
             { path: '/', title: '权限管理', name: 'auths', icon: 'arrow-swap', component: () => import('@/views/user/dept.vue') }
         ]
     },

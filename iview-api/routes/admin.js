@@ -1,15 +1,11 @@
 var express = require('express');
 var router = express.Router();
-var db = require('../models/dbMongodb');
-var util = require('../common/helper');
-var logger = require('../common/log');
-var apiEnum = require('../common/enum');
+
+
+//#region 文件上传
 var fs = require('fs');
 var multer = require('multer');
-
-/* 定义常量 */
-const str1 = '1';
-const pageSize = 10;
+const util = require('../common/helper');
 
 var createFolder = function(folder){
   try{
@@ -23,9 +19,6 @@ var createFolder = function(folder){
   }
 }
 
-/*
- *  文件上传
- **/
 var uploadFolder = '../uploadFolder/' + util.formatDate(new Date(),'yyyyMMdd') + '/';
 createFolder(uploadFolder);
 
@@ -40,371 +33,57 @@ var storage = multer.diskStorage({
 
 var upload = multer({ storage:storage});
 
-var result;
-router.use(function(req,res,next){
-  result = {
-    message:''
-  }
-  next()
-})
+//#endregion 
 
-/* GET home page. */
+var uploadCtr = require('../controller/admin/upload');
+
+var accountCtr = require('../controller/admin/account');
+var securityCtr = require('../controller/admin/security');
+var categoryCtr = require('../controller/admin/category');
+var shopCtr = require('../controller/admin/shop');
+var reportCtr = require('../controller/admin/report');
+
+/* get请求使用req.query获取参数，post请求使用req.body获取参数 */
+/* GET users listing. */
 router.get('/', function(req, res, next) {
-   res.render('index', { title: 'Express' });
+  res.send('admin api responsed success');
 });
 
-/**
- * 文件上传
- **/
-router.post('/uploadSingle', upload.single('file'),function(req,res,next){
-  try {
-    let fileName = req.file.path;
-    result.fileName = fileName;
+/* 用户相关 */
+router.get('/userList',accountCtr.getPageUser);
+router.get('/userDetail',accountCtr.getUserDetail);
+router.post('/addUser',accountCtr.addUser);
+router.post('/editUser',accountCtr.editUser);
+router.post('/removeUser',accountCtr.removeUser);
 
-    res.send(result);
-  } catch (error) {
-    logger.log("/api/admin/uploadSingle:" + error)
-  }
-})
+router.get('/dept',accountCtr.getDeptTree);
+router.post('/login',accountCtr.doLogin);
 
-/**
- * 批量上传
- **/
-router.post('/uploadArray',upload.array('files',5),function(req,res,next){
-  console.log('uploadArray:'+req.files[0]);
+/**分类相关 */
+router.get('/categoryList',categoryCtr.getCategoryList);
+router.get('/categoryListNew',categoryCtr.getCategoryNewList);
+router.post('/addCategory',categoryCtr.addCategory);
+router.post('/editCategory',categoryCtr.editCategory);
+router.post('/removeCategory',categoryCtr.removeCategory);
 
-  let fileName = req.files[0].path;
-  result.fileName = fileName;
-  res.send(result);
-})
+/** 商品相关 */
+router.get('/goodsList',shopCtr.getPageGoods);
+router.get('/goodsDetail',shopCtr.getGoodsDetail);
+router.post('/removeGoods',shopCtr.removeGoods);
 
-/**
- * base64压缩上传 (1、文件名会重新生成 2、只适合上传图片 3、图片会变大)
- **/
-router.post('/uploadBase64',upload.single('file'),function(req,res,next){
-  console.log("req.file:"+req.body.file);
-  let file = req.body.file;
-  let fileName = req.body.fileName;
-  let base64Data = file.replace(/^data:image\/\w+;base64,/, '');
-  let buffer = new Buffer(base64Data,'base64');
-  var path = uploadFolder.replace('./','') + fileName;
-  fs.writeFile(path,buffer,function(err){
-    if(err) throw err;
-    result.fileName = path; 
-    res.send(result);
-  })
-})
+/* 权限相关 */
+router.get('/roleList',securityCtr.getRole);
+router.get('/rolegroupList',securityCtr.getRoleGroup);
 
+/* 报告相关 */
+router.get('/reportList',reportCtr.getPageReport);
+router.get('/reportDetail',reportCtr.getReportDetail);
+router.post('/addReport',reportCtr.addReport);
+router.post('/editReport',reportCtr.editReport);
+router.post('/removeReport',reportCtr.removeReport);
 
-/* 获取用户分页数据 */
-router.get('/userList',function(req,res,next){
-  logger.info('get userList data'+ util.currDate)
-
-  var pageIndex = Number(req.query.pageIndex||1);
-  var dept = req.query.deptCode || str1 ;
-  var query = {};
-  var search = new RegExp(req.query.search,'i');
-  
-  if(req.query.search!=''){
-    // 多列模糊查询，且字母不区分大小写
-    query = { 
-      $or:[
-          { UserName:{$regex:search} },
-          { Mobile:{$regex:search,$options:'$i'}}
-        ]
-    }
-  }else{
-    query = {
-      DeptCode:{$regex:dept}
-    }
-  }
-  db.dbAccountInfo.countDocuments(query).then(function(count){
-    var skip = (pageIndex-1)*pageSize;
-    db.dbAccountInfo.find(query).sort({_id: util.sort.asc}).limit(pageSize).skip(skip).then(function(docs){
-      result = { pageIndex: pageIndex, total:count,data:docs };
-      res.json(result);
-    })
-
-    // 连接查询
-    // db.dbAccountInfo.find({}).populate({ path:'Department',select:{ name:1 } }).exec(function(err,obj){
-    //   console.log("data is :",obj);
-    // })
-  })
-})
-
-/* 获取用户详情 */
-router.get('/userDetail',function(req,res,next){
-  let _id = req.query.id;
-  if(!_id) return;
-  db.dbAccountInfo.findOne({_id:_id},function(err,docs){
-    if(err) throw err;
-    res.send(docs);
-  })
-})
-
-/* 添加用户 */
-router.post('/addUser',function(req,res,next){
-  let account = {
-    _id:null,
-    UserId:req.body.userId,
-    UserName:req.body.userName,
-    DeptCode:req.body.dept,
-    Password:req.body.password,
-    Mobile:req.body.mobile,
-    Email:req.body.email,
-    Position:req.body.position,
-    UserType:req.body.userType,
-    AuditDate:req.body.auditDate
-  }
-  db.dbAccountInfo.findOne({UserId:req.body.userId}).then(docs=>{
-    if(docs){
-      result.message = "用户名已存在";
-      return;
-    }
-    db.dbCounter.findOneAndUpdate({ _id:apiEnum.COUNTER.AccountId },{ $inc:{ seq:1 } },{ new:true,upsert:true },(error,counter) => {
-      if(error) throw error;
-      console.log('AccountSeq:'+counter.seq);
-      account._id = counter.seq;
-      db.dbAccountInfo.create(account).then(newAccount=>{
-        res.send(newAccount);
-      })
-    })
-  })
-})
-
-/* 修改用户 */
-router.post('/editUser',function(req,res,next){
-  var user = {
-    UserName : req.body.userName,
-    UserId : req.body.userId,
-    Password : req.body.password,
-    DeptCode : req.body.dept,
-    DeptName : req.body.deptName,
-    Mobile : req.body.mobile,
-    Email : req.body.email
-  }
-  db.dbAccountInfo.updateOne({_id:req.body.id},user,function(err,docs){
-    if(err) return;
-    res.send(docs);
-  })
-})
-
-/* 删除用户 */
-router.post('/removeUser',function(req,res,next){
-    db.dbAccountInfo.remove({_id:req.body.id},function(err,docs){
-      if(err) return;
-    
-      res.send(docs);
-    })
-})
-
-/* 获取报告分页数据 */
-router.get('/reportList', function(req, res, next) {
-  var pageIndex = Number(req.query.pageIndex||1);
-  var query = {};
-  if(req.query.name!=''){
-    query = { Title : { $regex : new RegExp(req.query.name,'i') }  };
-  }
-  db.dbReport.countDocuments(query).then(function(count){
-    let skip = (pageIndex - 1) * pageSize;
-    db.dbReport.find(query).sort({_id:util.sort.asc}).limit(pageSize).skip(skip).then(docs => {
-      let result = { pageIndex : pageIndex ,data : docs,total : count };
-      logger.info(`/reportList->Result:${JSON.stringify(result)}`)
-      res.json(result);
-    })
-  })
-});
-
-/* 添加报告 */
-router.post('/addReport',function(req,res,next){
-  let report = {
-    _id : null,
-    Title : req.body.title,
-    Thumb : req.body.thumb,
-    FileName : req.body.fileName,
-    CategoryId : '1.2',
-    CategoryName : req.body.category,
-    Content : req.body.content
-  }
-
-  db.dbReport.findOne({ Title : req.body.title }).then(docs=>{
-    if(docs){
-      result.message = '报告已存在';
-      return false;
-    }
-
-    db.dbCounter.findOneAndUpdate({ _id:apiEnum.COUNTER.ReportId },{ $inc:{ seq : 1 } },{ new:true,upsert:true },(error,counter) => {
-      if(error) throw error;
-      console.log('seq:'+counter.seq);
-      report._id = counter.seq;
-      
-      db.dbReport.create(report).then(newReport => {
-        res.send(newReport);
-      })
-    })
-  })
-})
-
-/* 删除报告 */
-router.post('/removeReport',function(req,res,next){
-  
-  db.dbReport.remove({_id:req.body.id},function(err,docs){
-    if(err) return;
-    db.dbCounter.findOneAndUpdate({ _id:apiEnum.COUNTER.ReportId },{ $inc:{seq:-1} },{new:true,upsert:true },function(error,counter){
-      if(error) throw error;
-    })
-    res.send(docs);
-  })
-})
-
-/** 
-* 报告详情  get请求使用req.query获取参数，post请求使用req.body获取参数
-**/
-router.get('/reportDetail',function(req,res,next){
-  let id = req.query.id; 
-  if(!id) return false;
-
-  console.log("rptDetail:"+id);
-  db.dbReport.findOne({ _id :id },function(error,docs){
-    if(error) throw error;
-    res.send(docs);
-  })
-})
-
-/* 修改报告 */
-router.post('/editReport',function(req,res,next){
-  let report = {
-    Title : req.body.title,
-    Thumb : req.body.thumb,
-    FileName :req.body.fileName,
-    CategoryId : '1.2',
-    CategoryName : req.body.category,
-    Content : req.body.content
-  }
-  db.dbReport.updateOne({ _id : req.body.id },report,function(error,docs){
-    if(error) throw error;
-    res.send(docs);
-  })
-
-})
-
-/* 获取部门树 */
-router.get('/dept',function(req,res,next){
-  db.dbAccountDept.find().then(function(docs){
-    result.data = docs;
-    res.send(result);
-  })
-})
-
-/* 会员登录 */
-router.post('/login',function(req,res,next){
-  let userName = req.body.userName;
-  let password = req.body.password;
-  let reg = new RegExp(userName,'i');
-  db.dbAccountInfo.find({$or:[{UserId:{$regex:reg}},{Mobile:{$regex:reg}}],Password : password },function(err,docs){
-    if(err) throw err; 
-    result.data = docs;
-    res.send(result);
-  })
-})
-
-/* 分类导航 */
-router.get('/categoryList',function(req,res,next){
-  var query = {};
-  var group = req.query.group;
-  if(!util.isNullOrEmpty(group)){
-    if(group.length == 1){
-      query = { Group : group[0] }
-    }else if(group.length > 1){
-      query = { Group: { $in : group } }
-    }
-  }
-  db.dbCategory.find(query).sort({ Sort:util.sort.asc }).then(docs => {
-    res.send(docs);
-  })
-})
-
-router.post('/addCategory',function(req,res,next){
-  let category = {
-    CategoryName : req.body.categoryName,
-    ParentId:req.body.parentId,
-  }
-  db.dbCounter.findOneAndUpdate({ _id :apiEnum.COUNTER.CategoryId },{ $inc:{ seq:1 } },{ new:true,upsert:true },function(error,counter){
-    console.log('seq:'+counter.seq);
-    category._id = counter.seq;
-    category.SelfCode = req.body.selfCode +'.' + counter.seq;
-    db.dbCategoryDZZD.create(category,function(error,docs){
-      if(error) throw error;
-      res.send(docs);
-    })
-  })
-})
-
-/** 修改分类 */
-router.post('/editCategory',function(req,res,next){
-  var id = req.body.id;
-  var newText = req.body.newText;
-
-  db.dbCategoryDZZD.updateOne({ _id:id },{ CategoryName:newText },function(error,docs){
-    if(error) throw error;
-    res.send(docs);
-  })
-})
-
-/** 删除分类 */
-router.post('/removeCategory',function(req,res,next){
-  db.dbCategoryDZZD.remove({_id:req.body.id},function(error,docs){
-    if(error) throw error;
-    res.send(docs);
-  })
-})
-
-/** 分类导航 */
-router.get('/categoryListNew',function(req,res,next){
-  db.dbCategoryDZZD.find().sort({ Sort:util.sort.asc }).then(docs => {
-    res.send(docs)
-  })
-})
-
-/* 商品列表 */
-router.get('/goodsList',function(req,res,next){
-  var pageIndex = Number(req.query.pageIndex || 1)
-  var query = {};
-  if(!util.isNullOrEmpty(req.query.goodsName)){
-    query = { GoodsName : {$regex : new RegExp(req.query.goodName,i)} }
-  }
-  db.dbGoodsInfo.countDocuments(query).then((count)=>{
-    let skip = (pageIndex -1 )* pageSize;
-    db.dbGoodsInfo.find(query).skip(skip).limit(pageSize).sort({_id:util.sort.asc}).then(docs => {
-      result = { pageIndex:pageIndex,total:count,data:docs };
-      res.send(result);
-    })
-  })
-})
-
-/* 商品详情 */
-router.get('/goodsDetail',function(req,res,next){
-  var query = {};
-  var id = req.query.id;
-  if(!util.isNullOrEmpty(id)){
-    query = { _id :id };
-  }
-  db.dbGoodsInfo.findOne(query).then(docs => {
-    res.send(docs);
-    console.log('resultId'+docs._id)
-  })
-})
-
-/**
- * 删除商品
- */
-router.post('/removeGoods',function(req,res,next){
-  db.dbGoodsInfo.remove({_id : req.body.id },(err,docs)=>{
-    if(err) throw err;
-    res.send(docs);
-  })
-})
-
-
+/* 文件上传 */
+router.post('/uploadSingle',upload.single('file'),uploadCtr.uploadSingle);
+router.post('/uploadArray',upload.array('files',5),uploadCtr.uploadMulter);
 
 module.exports = router;

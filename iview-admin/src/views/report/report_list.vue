@@ -3,7 +3,8 @@
     @import '../../styles/image-editor.less';
     @import '../../styles/cropper.min.css';
     @import '../../styles/simplemde.min.css';
-    
+   
+    @import 'quill/dist/quill.snow.css';
 </style>
 <!-- 文章列表 -->
 <template>
@@ -81,6 +82,10 @@
                 </Col>
             </Row>
         </FormItem>
+
+        <FormItem label="Quill">
+            <quill-editor ref="quill_editor" :options="quillOption" ></quill-editor>
+        </FormItem>
       </Form>
     </Modal>
 
@@ -90,7 +95,9 @@
 <script>
 import util from '@/libs/util.js'
 import SimpleMDE from 'simplemde'
-import Cropper from 'cropperjs';
+import Cropper from 'cropperjs'
+import {quillEditor} from 'vue-quill-editor'  // 局部引用
+
 
 const editButton = (_this,h,params) => {
     return h('Button', {
@@ -160,8 +167,16 @@ export default {
         ruleValidate:{
           title:[{ required:true,message:'标题不能为空',trigger:'blur' }]
         },
-        search:''
+        search:'',
+        quillOption:{
+            modules:{ toolbar:[['bold', 'italic', 'underline', 'strike'], ['blockquote', 'code-block'],[{ 'header': 1 }, { 'header': 2 }]] },
+            theme:'snow',
+            placeholder:'请输入正文'
+        },
     };
+  },
+  components:{
+      quillEditor
   },
   mounted(){
     this.getReport(this.pageIndex);
@@ -181,6 +196,7 @@ export default {
         placeholder:'请填写文章内容',
         toolbar: ['bold', 'italic', 'heading', '|', 'quote', 'unordered-list', 'clean-block', '|', 'link', 'image', 'table', 'horizontal-rule', '|', 'preview']
     })
+    
   },
   methods: {
     getReport(pageIndex){
@@ -300,4 +316,5 @@ export default {
     .ivu-modal{ top:20px; }
     .input{ width:400px }
     .ivu-card-body{padding:5px}
+    .ivu-table td, .ivu-table th { height:35px;}
 </style>

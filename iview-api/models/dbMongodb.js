@@ -105,7 +105,6 @@ var GoodsInfoSch = new mongoose.Schema({
     CreateDate:Date
 },{ collection:'DZZD_GoodsInfo' },{ versionKey:false })
 
-
 var DZZDCategorySch = new mongoose.Schema({
     _id:Number,
     CategoryName:String,
@@ -115,6 +114,15 @@ var DZZDCategorySch = new mongoose.Schema({
     SelfCode:String  // 自身Code(2.3.5)
 },{ collection:'DZZD_Category'},{ versionKey:false })
 
+var DZZDRole = new mongoose.Schema({
+    _id:Number,
+    Name : String
+},{ collection:'DZZD_P_Role'},{ versionKey : false })
+
+var DZZDRoleGroup = new mongoose.Schema({
+    _id:Number,
+    Name:String
+},{ collection:'DZZD_P_RoleGroup' },{ versionKey : false })
 
 Model = {
     dbCounter : mongoose.model('Counter',CounterSch),
@@ -124,7 +132,9 @@ Model = {
     dbAccountDept : mongoose.model('AccountDept',AccountDeptSch),
     dbShopCart : mongoose.model('ShopCart',ShopCartSch),
     dbGoodsInfo:mongoose.model('GoodsInfo',GoodsInfoSch),
-    dbCategoryDZZD : mongoose.model('DZZD_Category',DZZDCategorySch)
+    dbCategoryDZZD : mongoose.model('DZZD_Category',DZZDCategorySch),
+    dbRole :mongoose.model('DZZD_P_Role',DZZDRole),
+    dbRoleGroup:mongoose.model('DZZD_P_RoleGroup',DZZDRoleGroup)
 }
 
 module.exports = Model
